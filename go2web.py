@@ -1,7 +1,10 @@
 import sys, ssl
 import socket, warnings
+import os, hashlib
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+
+CACHE_DIRECTORY = 'http_cache'
 
 def search_term(term):
     response = make_request(f"https://www.google.com/search?q={term}")
@@ -43,6 +46,13 @@ def print_url_response(url):
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def make_request(url):
+    cache_key = hashlib.md5(url.encode()).hexdigest()
+    cache_file = os.path.join(CACHE_DIRECTORY, cache_key)
+
+    if os.path.exists(cache_file):
+        with open(cache_file, 'r') as f:
+            print("Retrieved from cache\n")
+            return f.read()
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     parsed_url = urlparse(url)
@@ -66,6 +76,9 @@ def make_request(url):
                 response += data
             except socket.timeout:
                 break
+
+        with open(cache_file, 'w') as f:
+            f.write(response.decode('utf-8', errors='ignore'))
 
         client_socket.close()
         return response.decode('utf-8', errors='ignore')
