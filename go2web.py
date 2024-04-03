@@ -18,6 +18,7 @@ def search_term(term):
             if term in result.text.lower():
                 count += 1
                 print(f"Result {count}: {result.text}")
+                print(f"Link: {link}" + "\n")
 
 def print_url_response(url):
     response = make_request(url)
