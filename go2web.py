@@ -1,9 +1,29 @@
 import sys, ssl
-import socket
+import socket, warnings
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
 def print_url_response(url):
-    return
+    response = make_request(url)
+    soup = BeautifulSoup(response, 'html.parser')
+
+    print("\nURL Content:")
+    print("=" * 20)
+    for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'ul', 'img']):
+        if tag.name.startswith('h'):
+            print("\n" + tag.get_text().strip() + "\n")
+        elif tag.name == 'ul':
+            for li in tag.find_all('li'):
+                print(li.get_text().strip())
+        elif tag.name == 'a' and tag.get('href') and (tag.get('href').startswith('http://') or tag.get('href').startswith('https://')):
+            print(tag.get_text().strip())
+            print("Link:", tag.get('href'))
+        elif tag.name == 'p':
+            print(tag.get_text().strip())
+        elif tag.name == 'img' and tag.get('src'):
+            print("Image:", tag.get('src'))
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def make_request(url):
 
