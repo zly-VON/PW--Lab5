@@ -3,6 +3,22 @@ import socket, warnings
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
+def search_term(term):
+    response = make_request(f"https://www.google.com/search?q={term}")
+    soup = BeautifulSoup(response, "html.parser")
+    search_results = soup.find_all("a")
+    count = 0
+
+    for result in search_results:
+        if count >= 10:
+            break
+        link = result.get("href")
+        if link.startswith("/url?q="):
+            link = link.split("/url?q=")[1].split("&")[0]
+            if term in result.text.lower():
+                count += 1
+                print(f"Result {count}: {result.text}")
+
 def print_url_response(url):
     response = make_request(url)
     soup = BeautifulSoup(response, 'html.parser')
@@ -73,7 +89,11 @@ def main():
             url = sys.argv[2]
             print_url_response(url)
     elif sys.argv[1] == '-s':
-        term = sys.argv[2]
+        if len(sys.argv) < 3:
+            print("Missing arguments. Use -h for help.")
+        else:
+            term = sys.argv[2]
+            search_term(term)
     else:
         print("Invalid arguments. Use -h for help.")
 
