@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 CACHE_DIRECTORY = 'http_cache'
+if not os.path.exists(CACHE_DIRECTORY):
+    os.makedirs(CACHE_DIRECTORY)
 
 def search_term(term):
     response = make_request(f"https://www.google.com/search?q={term}")
@@ -50,7 +52,7 @@ def make_request(url):
     cache_file = os.path.join(CACHE_DIRECTORY, cache_key)
 
     if os.path.exists(cache_file):
-        with open(cache_file, 'r') as f:
+        with open(cache_file, 'r', encoding='utf-8') as f:
             print("Retrieved from cache\n")
             return f.read()
 
@@ -77,7 +79,7 @@ def make_request(url):
             except socket.timeout:
                 break
 
-        with open(cache_file, 'w') as f:
+        with open(cache_file, 'w', encoding='utf-8') as f:
             f.write(response.decode('utf-8', errors='ignore'))
 
         client_socket.close()
